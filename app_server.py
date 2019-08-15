@@ -71,6 +71,7 @@ def blur():
     print('decoding time: ', img_decoding_time)
     result = mrcnn_model.detect(img)
     res_img = image_processor.make_image_blur(result, img)
+    cv2.imwrite('result.jpg', res_img)
 
     detect_fin = time.time()
     detecting_time = detect_fin - decoding_fin
@@ -100,6 +101,7 @@ def blur_gray():
     print('decoding time: ', img_decoding_time)
     result = mrcnn_model.detect(img)
     res_img = image_processor.make_image_blur_gray(result, img)
+    cv2.imwrite('result.jpg', res_img)
 
     detect_fin = time.time()
     detecting_time = detect_fin - decoding_fin
