@@ -1,0 +1,8 @@
+.vscode
+*.png
+*.jpg
+.DS_Store
+mask_rcnn_coco.h5
+ml/
+__pycache__
+results/
