@@ -41,7 +41,7 @@ def blur(img_path):
     cv2.imwrite(out_path, res_img)
 
 if __name__ == '__main__':
-    input_dir = '/Users/konotatsuya/images4blur'
+    input_dir = ''
     imgs = glob.glob(os.path.join(input_dir, '*.jpg'))
     for img in tqdm(imgs):
         blur(img)
