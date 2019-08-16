@@ -8,11 +8,11 @@ def make_image_gray(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            mask = result['masks'][:,:,i]
-            mask_img = _apply_mask(img, mask)
-            mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
-            total_mask += mask_img
-        ppl_extracts = np.zeros((img.shape[0], img.shape[1],3), np.uint8)
+            if _check_roi(result, img_area, i)
+                mask = result['masks'][:,:,i]
+                mask_img = _apply_mask(img, mask)
+                mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
+                total_mask += mask_img
         #マスク重なりを修正する
         total_mask = cv2.threshold(total_mask, 200, 255,cv2.THRESH_BINARY)[1]
         total_mask = cv2.cvtColor(total_mask, cv2.COLOR_GRAY2BGR)
@@ -32,11 +32,7 @@ def make_image_blur(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            roi = result['rois'][i]
-            w = roi[3] - roi[1]
-            h = roi[2] - roi[0]
-            rate = float((w*h)/img_area)
-            if rate > THRESH_ROI:
+            if _check_roi(result, img_area, i)
                 mask = result['masks'][:,:,i]
                 mask_img = _apply_mask(img, mask)
                 mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
@@ -59,11 +55,7 @@ def make_image_blur_gray(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            roi = result['rois'][i]
-            w = roi[3] - roi[1]
-            h = roi[2] - roi[0]
-            rate = float((w*h)/img_area)
-            if rate > THRESH_ROI:
+            if _check_roi(result, img_area, i)
                 mask = result['masks'][:,:,i]
                 mask_img = _apply_mask(img, mask)
                 mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
@@ -100,3 +92,13 @@ def _gray_with_3channel(img):
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+def _check_roi(result, img_area, i):
+    roi = result['rois'][i]
+    w = roi[3] - roi[1]
+    h = roi[2] - roi[0]
+    rate = float((w*h)/img_area)
+    if rate > THRESH_ROI:
+        return True
+    else:
+        return False
