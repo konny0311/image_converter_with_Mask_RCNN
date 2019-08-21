@@ -18,7 +18,7 @@ sys.path.append(os.path.join(os.getcwd(), 'mask_rcnn'))
 from mask_rcnn.mrcnn_model import MaskRcnnModel
 
 
-ACCESS_TOKEN = '' # line access token
+ACCESS_TOKEN = os.getenv('LINE_IMAGE_CONVERTER_TOKEN')
 
 
 # サーバー起動時にモデルインスタンス作成
