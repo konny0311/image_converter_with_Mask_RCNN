@@ -13,17 +13,25 @@ import sys
 import time
 import base64
 import datetime
+import secrets
+import json
 import requests
+import boto3
 import image_processor
 sys.path.append(os.path.join(os.getcwd(), 'mask_rcnn'))
 from mask_rcnn.mrcnn_model import MaskRcnnModel
 
 
 ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
-
+REGION = os.getenv('REGION')
+BUCKET = os.getenv('BUCKET')
+FOLDER = os.getenv('LINE_FOLDER')
+ACCESS = 'public-read'
 
 # サーバー起動時にモデルインスタンス作成
 mrcnn_model = MaskRcnnModel()
+session = boto3.Session(profile_name='private')
+s3_client = session.client('s3')
 
 @route('/')
 def health():
@@ -139,22 +147,41 @@ def line_blur():
     #res.contentでバイナリデータ受け取る
     f = io.BytesIO(res.content)
     img = cv2.imdecode(np.frombuffer(f.getbuffer(), np.uint8), 1) #image with color(3 channels)
-    # cv2.imwrite('debug.jpg', img)
     result = mrcnn_model.detect(img)
-    res_img = image_processor.make_image_blur(result, img)
-    # res_img = mrcnn_model.detect(img)
+    img = image_processor.make_image_blur(result, img)
     now = datetime.datetime.now()
     name = now.strftime('%Y%m%d%H%M%S')
-    filename = '{}_blur.jpg'.format(name)
-    cv2.imwrite(filename, res_img)
+    ran = secrets.token_hex(16)
+    filename = '{}_blur_{}.jpg'.format(name, ran)
     print('{} saved'.format(filename))
 
-    _, res_str = cv2.imencode('.jpg', res_img)
-    res_str = base64.b64encode(res_str)
+    _save_img_s3(img, filename)
 
-    res = HTTPResponse(status=200, body=res_str)
-    res.set_header('Content-Type', 'image/jpg')
-    res.set_header('Access-Control-Allow-Origin', '*') # cross domain
+    thumbnail_img = _create_thumbnail(img)
+    thumbnail_filename = '{}_thumbnail_blur_{}.jpg'.format(name, ran)
+    _save_img_s3(thumbnail_img, thumbnail_filename)
+                                     
+    image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, filename)
+    thumbnail_image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, thumbnail_filename)
+
+    message = {
+                "type": "image",
+                "originalContentUrl": image_url_after_convert,
+                "previewImageUrl": thumbnail_image_url_after_convert
+              }
+
+    line_url = 'https://api.line.me/v2/bot/message/reply'
+    headers = {'Content-Type':'application/json',
+               'Authorization': 'Bearer {}'.format(ACCESS_TOKEN)}
+    body = {'replyToken':reply_token,
+            'messages': [message]}
+    body_json = json.dumps(body)
+    print(body_json)
+    line_res = requests.post(line_url, data=body_json, headers=headers)
+    print(line_res)
+    print(line_res.json())
+
+    res = HTTPResponse(status=200)
 
     return res
 
@@ -163,6 +190,30 @@ def line_blur():
 @route('/images/<file_path:path>')
 def static(file_path):
     return static_file(file_path, root='./', download=True)
+
+
+def _create_thumbnail(img):
+    """
+    line api accepts 240 x 240 thumbnail image as max
+    """
+    h, w, _ = img.shape
+    if h > w:
+        w = int(w * (240/h))
+        h = 240
+    else:
+        h = int(h * (240/w))
+        w = 240
+    
+    return cv2.resize(img, (w, h))
+
+def _save_img_s3(img, filename):
+    _, img_str = cv2.imencode('.jpg', img)
+    img_bytes = img_str.tobytes()
+
+    s3_result = s3_client.put_object(Body=img_bytes,
+                                     Bucket=BUCKET,
+                                     Key='{}/{}'.format(FOLDER, filename),
+                                     ACL=ACCESS)
 
 
 run(host='0.0.0.0', port=8080)
