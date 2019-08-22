@@ -8,7 +8,7 @@ def make_image_gray(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            if _check_roi(result, img_area, i)
+            if _check_roi(result, img_area, i):
                 mask = result['masks'][:,:,i]
                 mask_img = _apply_mask(img, mask)
                 mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
@@ -32,7 +32,7 @@ def make_image_blur(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            if _check_roi(result, img_area, i)
+            if _check_roi(result, img_area, i):
                 mask = result['masks'][:,:,i]
                 mask_img = _apply_mask(img, mask)
                 mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
@@ -55,7 +55,7 @@ def make_image_blur_gray(result, img):
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
         for i in idxs:
-            if _check_roi(result, img_area, i)
+            if _check_roi(result, img_area, i):
                 mask = result['masks'][:,:,i]
                 mask_img = _apply_mask(img, mask)
                 mask_img = cv2.cvtColor(mask_img, cv2.COLOR_BGR2GRAY)
