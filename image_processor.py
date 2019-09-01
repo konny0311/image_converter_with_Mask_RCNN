@@ -4,6 +4,8 @@ import numpy as np
 THRESH_ROI = 0.1
 
 def make_image_gray(result, img):
+    ori = img.copy()
+    img_area = img.shape[0] * img.shape[1]
     if 1 in result['class_ids']: # 1 is an id of person
         idxs = np.where(result['class_ids'] == 1)[0]
         total_mask = np.zeros((img.shape[0], img.shape[1]), np.uint8)
@@ -16,7 +18,7 @@ def make_image_gray(result, img):
         #マスク重なりを修正する
         total_mask = cv2.threshold(total_mask, 200, 255,cv2.THRESH_BINARY)[1]
         total_mask = cv2.cvtColor(total_mask, cv2.COLOR_GRAY2BGR)
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray_img = cv2.cvtColor(ori, cv2.COLOR_BGR2GRAY)
         gray_img = cv2.cvtColor(gray_img, cv2.COLOR_GRAY2BGR)
         out = np.where(total_mask==np.array([255, 255, 255]), img, gray_img)
 

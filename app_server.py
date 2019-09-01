@@ -130,8 +130,8 @@ def blur_gray():
 
     return res
 
-@post('/splash/line/blur')
-def line_blur():
+@post('/splash/line')
+def line():
     """
     json = {'image_url': image_url
             'reply_token': request['replyToken']}
@@ -142,13 +142,19 @@ def line_blur():
     print('image_url', image_url)
     reply_token = request.forms.get('reply_token')
     print('reply_token', reply_token)
+    convert_type = request.forms.get('convert_type')
     headers = {'Authorization': 'Bearer {}'.format(ACCESS_TOKEN)}
     res = requests.get(image_url, headers=headers)
     #res.contentでバイナリデータ受け取る
     f = io.BytesIO(res.content)
     img = cv2.imdecode(np.frombuffer(f.getbuffer(), np.uint8), 1) #image with color(3 channels)
     result = mrcnn_model.detect(img)
-    img = image_processor.make_image_blur(result, img)
+    if convert_type == 'blur':
+        img = image_processor.make_image_blur(result, img)
+    elif convert_type == 'gray':
+        img = image_processor.make_image_gray(result, img)
+    elif convert_type == 'blur_gray':
+        img = image_processor.make_image_blur_gray(result, img)
     now = datetime.datetime.now()
     name = now.strftime('%Y%m%d%H%M%S')
     ran = secrets.token_hex(16)
