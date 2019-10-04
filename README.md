@@ -9,10 +9,10 @@
 ### Background-gray-blur image
 ![result_blur_gray](https://user-images.githubusercontent.com/34429021/63095576-8e09e400-bfa6-11e9-86d1-e58bdf93dead.jpg)
 
-## Download pre-trained model weights
+## Preparation before starting this server
 ```
-cd mask_rcnn/weights
-wget https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5
+# create a directory of model weights and download a trained weight
+sh prep.sh
 ```
 
 ## Note
