@@ -96,7 +96,7 @@ Shapely==1.6.4.post2
 simplegeneric==0.8.1
 six==1.11.0
 tensorboard==1.13.1
-tensorflow==1.13.1
+tensorflow==1.15.2
 tensorflow-estimator==1.13.0
 termcolor==1.1.0
 terminado==0.8.1
