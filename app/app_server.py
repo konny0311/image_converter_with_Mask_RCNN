@@ -4,23 +4,23 @@ This is an API server for "splash of color" using Mask R-CNN.
 The server recieves an image and turns non-human area of the image into gray,
 then send back the editted image to a client.
 """
-from bottle import route, post, run, template, request, hook, static_file, HTTPResponse
 import io
-import cv2
-import numpy as np
 import os
+import cv2
 import sys
 import time
-import base64
-import datetime
-import secrets
 import json
-import requests
 import boto3
+import base64
+import secrets
+import datetime
+import requests
+import numpy as np
 import image_processor
 sys.path.append(os.path.join(os.getcwd(), 'mask_rcnn'))
 from mask_rcnn.mrcnn_model import MaskRcnnModel
-
+from google.cloud import storage
+from bottle import route, post, run, template, request, hook, static_file, HTTPResponse
 
 ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
 REGION = os.getenv('REGION')
@@ -30,8 +30,6 @@ ACCESS = 'public-read'
 
 # サーバー起動時にモデルインスタンス作成
 mrcnn_model = MaskRcnnModel()
-session = boto3.Session(profile_name='private')
-s3_client = session.client('s3')
 
 @route('/')
 def health():
@@ -53,9 +51,8 @@ def gray():
     print('decoding time: ', img_decoding_time)
     result = mrcnn_model.detect(img)
     res_img = image_processor.make_image_gray(result, img)
-    # res_img = mrcnn_model.detect(img)
     name = os.path.splitext(upload.filename)[0]
-    cv2.imwrite('{}_gray.jpg'.format(name), res_img)
+    # cv2.imwrite('{}_gray.jpg'.format(name), res_img)
 
     detect_fin = time.time()
     detecting_time = detect_fin - decoding_fin
@@ -161,11 +158,11 @@ def line():
     filename = '{}_blur_{}.jpg'.format(name, ran)
     print('{} saved'.format(filename))
 
-    _save_img_s3(img, filename)
+    _save_img2cloudStorage(img, filename)
 
     thumbnail_img = _create_thumbnail(img)
     thumbnail_filename = '{}_thumbnail_blur_{}.jpg'.format(name, ran)
-    _save_img_s3(thumbnail_img, thumbnail_filename)
+    _save_img2cloudStorage(thumbnail_img, thumbnail_filename)
                                      
     image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, filename)
     thumbnail_image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, thumbnail_filename)
@@ -212,7 +209,7 @@ def _create_thumbnail(img):
     
     return cv2.resize(img, (w, h))
 
-def _save_img_s3(img, filename):
+def _save_img2cloudStorage(img, filename):
     _, img_str = cv2.imencode('.jpg', img)
     img_bytes = img_str.tobytes()
 
