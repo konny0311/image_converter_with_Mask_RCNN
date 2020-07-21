@@ -1,3 +1,4 @@
+import cv2
 from google.cloud import storage
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -9,8 +10,11 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
-
-    blob.upload_from_filename(source_file_name)
+    img = cv2.imread(source_file_name)
+    _, img_str = cv2.imencode('.jpg', img)
+    img_bytes = img_str.tobytes()
+    # blob.upload_from_filename(source_file_name)
+    blob.upload_from_string(img_bytes)
 
     print(
         "File {} uploaded to {}.".format(
@@ -28,5 +32,5 @@ def implicit():
     buckets = list(storage_client.list_buckets())
     print(buckets)
 
-upload_blob('line-konny', 'test.txt', 'is-uploaded.txt')
+upload_blob('line-konny', 'test.jpg', 'dogdog.jpg')
 # implicit()
