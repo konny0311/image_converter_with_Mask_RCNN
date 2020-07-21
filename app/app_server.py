@@ -67,8 +67,8 @@ def line():
     thumbnail_filename = '{}_thumbnail_blur_{}.jpg'.format(name, ran)
     _save_img2cloudStorage(thumbnail_img, thumbnail_filename)
                                      
-    image_url_after_convert = 'https://storage.cloud.google.com/{}/{}'.format(BUCKET, filename)
-    thumbnail_image_url_after_convert = 'https://storage.cloud.google.com/{}/{}'.format(BUCKET, thumbnail_filename)
+    image_url_after_convert = 'https://storage.googleapis.com/{}/{}'.format(BUCKET, filename)
+    thumbnail_image_url_after_convert = 'https://storage.googleapis.com/{}/{}'.format(BUCKET, thumbnail_filename)
     message = {
                 "type": "image",
                 "originalContentUrl": image_url_after_convert,
@@ -116,5 +116,6 @@ def _save_img2cloudStorage(img, filename):
     img_bytes = img_str.tobytes()
     blob = BUCKET.blob(filename)
     blob.upload_from_string(img_bytes)
+    blob.make_public()
 
 run(host='0.0.0.0', port=8080)
