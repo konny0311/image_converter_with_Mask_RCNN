@@ -23,6 +23,8 @@ from bottle import route, post, run, template, request, hook, static_file, HTTPR
 
 # サーバー起動時にモデルインスタンス作成
 mrcnn_model = MaskRcnnModel()
+storage_client = storage.Client()
+BUCKET = storage_client.bucket('line-konny')
 
 @route('/')
 def health():
@@ -65,9 +67,8 @@ def line():
     thumbnail_filename = '{}_thumbnail_blur_{}.jpg'.format(name, ran)
     _save_img2cloudStorage(thumbnail_img, thumbnail_filename)
                                      
-    image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, filename)
-    thumbnail_image_url_after_convert = 'https://{}.s3-{}.amazonaws.com/{}/{}'.format(BUCKET, REGION, FOLDER, thumbnail_filename)
-
+    image_url_after_convert = 'https://storage.cloud.google.com/{}/{}'.format(BUCKET, filename)
+    thumbnail_image_url_after_convert = 'https://storage.cloud.google.com/{}/{}'.format(BUCKET, thumbnail_filename)
     message = {
                 "type": "image",
                 "originalContentUrl": image_url_after_convert,
@@ -113,11 +114,7 @@ def _create_thumbnail(img):
 def _save_img2cloudStorage(img, filename):
     _, img_str = cv2.imencode('.jpg', img)
     img_bytes = img_str.tobytes()
-
-    s3_result = s3_client.put_object(Body=img_bytes,
-                                     Bucket=BUCKET,
-                                     Key='{}/{}'.format(FOLDER, filename),
-                                     ACL=ACCESS)
-
+    blob = BUCKET.blob(filename)
+    blob.upload_from_string(img_bytes)
 
 run(host='0.0.0.0', port=8080)
