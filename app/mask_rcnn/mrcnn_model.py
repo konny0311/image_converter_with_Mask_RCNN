@@ -7,7 +7,7 @@ import colorsys
 import time
 from mrcnn import utils
 import mrcnn.model as modellib
-from mrcnn import visualize
+
 # Import COCO config
 if 'mask_rcnn' in os.getcwd():
     sys.path.append(os.path.join(os.getcwd(), 'samples', 'coco'))  # To find local version
@@ -114,5 +114,7 @@ visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'],
 if __name__ == '__main__':
 
     mrcnn_model = MaskRcnnModel()
-    img = cv2.imread('../splash_trial2.jpg')
+    img = cv2.imread('test.png')
     target = mrcnn_model.detect(img)
+    print(target)
+    print(target['class_ids'])

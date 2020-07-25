@@ -1,10 +1,11 @@
 bottle==0.12.16
+scikit-image==0.14.3
+imgaug==0.2.9
 Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
 numpy==1.16.4
 opencv-python==4.1.0.25
 requests==2.19.1
-tensorflow==1.13.1
 tqdm==4.33.0
-google-cloud-storage=1.29.0
+google-cloud-storage==1.29.0
