@@ -4,7 +4,7 @@ imgaug==0.2.9
 Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
-numpy==1.16.4
+numpy==1.22.0
 opencv-python==4.1.0.25
 requests==2.19.1
 tqdm==4.33.0
